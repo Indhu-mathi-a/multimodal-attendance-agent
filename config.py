@@ -8,9 +8,16 @@ from pathlib import Path
 
 # ─── Base Paths ────────────────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).resolve().parent
-DATABASE_PATH = BASE_DIR / "database" / "attendance.db"
-UPLOAD_FOLDER = BASE_DIR / "uploads"
-REPORTS_FOLDER = BASE_DIR / "reports"
+IS_VERCEL = bool(os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"))
+
+if IS_VERCEL:
+    DATABASE_PATH = Path("/tmp") / "attendance.db"
+    UPLOAD_FOLDER = Path("/tmp") / "uploads"
+    REPORTS_FOLDER = Path("/tmp") / "reports"
+else:
+    DATABASE_PATH = BASE_DIR / "database" / "attendance.db"
+    UPLOAD_FOLDER = BASE_DIR / "uploads"
+    REPORTS_FOLDER = BASE_DIR / "reports"
 
 # ─── Flask Settings ────────────────────────────────────────────────────────────
 class Config:
@@ -41,8 +48,8 @@ class Config:
     GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
     USE_GEMINI = bool(os.environ.get("USE_GEMINI", False))
 
-    # Demo data
-    LOAD_DEMO_DATA = os.environ.get("LOAD_DEMO_DATA", "false").lower() == "true"
+    # Demo data (default to true on Vercel for instant demo preview)
+    LOAD_DEMO_DATA = os.environ.get("LOAD_DEMO_DATA", "true" if IS_VERCEL else "false").lower() == "true"
 
     # Data retention (days). 0 = keep forever
     TEMP_FILE_RETENTION_DAYS = 7

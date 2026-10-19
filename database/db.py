@@ -17,11 +17,17 @@ def get_db():
     """Return the database connection for the current request context."""
     if "db" not in g:
         db_path = flask.current_app.config["DATABASE"]
-        Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+        try:
+            Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+        except OSError:
+            pass
         g.db = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES)
         g.db.row_factory = sqlite3.Row          # Rows behave like dicts
         g.db.execute("PRAGMA foreign_keys = ON")
-        g.db.execute("PRAGMA journal_mode = WAL")
+        try:
+            g.db.execute("PRAGMA journal_mode = WAL")
+        except sqlite3.OperationalError:
+            g.db.execute("PRAGMA journal_mode = DELETE")
     return g.db
 
 
@@ -34,19 +40,36 @@ def close_db(e=None):
 
 def init_db(app):
     """Create all tables and optionally load demo data."""
+    import shutil
     from database.schema import SCHEMA_SQL, DEMO_DATA_SQL
 
-    db_path = app.config["DATABASE"]
-    Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+    db_path = Path(app.config["DATABASE"])
+    try:
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        pass
 
-    conn = sqlite3.connect(db_path)
+    # In serverless environments, copy pre-seeded database if available
+    repo_db = Path(__file__).resolve().parent / "attendance.db"
+    if str(db_path).startswith("/tmp") and repo_db.exists() and not db_path.exists():
+        try:
+            shutil.copy2(repo_db, db_path)
+            logger.info("Copied initial database from %s to %s", repo_db, db_path)
+            return
+        except Exception as e:
+            logger.warning("Could not copy initial db: %s", e)
+
+    conn = sqlite3.connect(str(db_path))
     conn.executescript(SCHEMA_SQL)
     conn.commit()
 
     if app.config.get("LOAD_DEMO_DATA"):
-        conn.executescript(DEMO_DATA_SQL)
-        conn.commit()
-        logger.info("Demo data loaded.")
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) FROM students")
+        if cur.fetchone()[0] == 0:
+            conn.executescript(DEMO_DATA_SQL)
+            conn.commit()
+            logger.info("Demo data loaded.")
 
     conn.close()
     logger.info("Database initialized at %s", db_path)

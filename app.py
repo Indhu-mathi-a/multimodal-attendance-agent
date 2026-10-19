@@ -39,7 +39,10 @@ def create_app(config_name: str = None) -> Flask:
         app.config["REPORTS_FOLDER"],
         Path(app.config["DATABASE"]).parent,
     ]:
-        Path(folder).mkdir(parents=True, exist_ok=True)
+        try:
+            Path(folder).mkdir(parents=True, exist_ok=True)
+        except OSError as err:
+            logger.warning("Could not create folder %s: %s", folder, err)
 
     # ── Database ──────────────────────────────────────────────────────────────
     with app.app_context():

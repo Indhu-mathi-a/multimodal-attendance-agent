@@ -1,0 +1,21 @@
+# Core Flask framework
+Flask==3.0.3
+Werkzeug==3.0.3
+
+# Data processing
+numpy==1.26.4
+pandas==2.2.2
+
+# Audio analysis (optional but recommended)
+pydub==0.25.1
+
+# Video analysis (optional but recommended)
+# opencv-python-headless is preferred on servers; opencv-python for local dev
+opencv-python-headless==4.10.0.84
+
+# Testing
+pytest==8.2.2
+pytest-flask==1.3.0
+
+# Environment variable management
+python-dotenv==1.0.1

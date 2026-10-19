@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Engagement Analytics{% endblock %}
+{% block page_title %}Engagement Analytics{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+  <!-- Session Score Panel -->
+  <div class="col-xl-5">
+    <div class="card-glass h-100">
+      <div class="card-glass-header">
+        <h6 class="mb-0"><i class="bi bi-speedometer2 me-2 text-primary"></i>Activity & Participation Indicator</h6>
+      </div>
+      <div class="card-glass-body">
+        <label class="form-label">Select Session</label>
+        <div class="d-flex gap-2 mb-4">
+          <select id="engSessionSelect" class="form-select">
+            <option value="">Choose session…</option>
+          </select>
+          <button class="btn btn-primary" id="loadScoreBtn">Load</button>
+        </div>
+
+        <!-- Score gauge area -->
+        <div class="text-center mb-4" id="scorePlaceholder">
+          <p class="text-muted">Select a session to view its score.</p>
+        </div>
+        <div id="scoreDisplay" style="display:none">
+          <div class="score-gauge-wrapper mb-3">
+            <canvas id="scoreGauge"></canvas>
+            <div class="score-center-label" id="scoreValue">–</div>
+          </div>
+          <div class="mb-3" id="componentsList"></div>
+          <div class="alert alert-warning small mb-0">
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            <span id="scoreDisclaimer"></span>
+          </div>
+        </div>
+
+        <!-- Participation log -->
+        <div class="mt-4" id="participationLogArea" style="display:none">
+          <h6 class="mb-2">Log Participation Event</h6>
+          <div class="row g-2">
+            <div class="col-md-6">
+              <select id="eventType" class="form-select form-select-sm">
+                <option value="question_asked">Question Asked</option>
+                <option value="answer_given">Answer Given</option>
+                <option value="discussion">Discussion</option>
+                <option value="quiz_response">Quiz Response</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <select id="eventStudent" class="form-select form-select-sm">
+                <option value="">Class-wide (no student)</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <button class="btn btn-success btn-sm w-100" id="logEventBtn">
+                <i class="bi bi-plus-circle me-1"></i>Log Event
+              </button>
+            </div>
+          </div>
+          <div class="mt-2" id="recentEvents">
+            <p class="text-muted small mb-0">No events logged yet.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trend Chart Panel -->
+  <div class="col-xl-7">
+    <div class="card-glass h-100">
+      <div class="card-glass-header d-flex justify-content-between align-items-center">
+        <h6 class="mb-0"><i class="bi bi-graph-up-arrow me-2 text-purple"></i>Session Trend</h6>
+        <button class="btn btn-sm btn-outline-primary" id="loadTrendBtn">Refresh</button>
+      </div>
+      <div class="card-glass-body">
+        <canvas id="trendChart" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Activity Timeline -->
+<div class="card-glass" id="timelineCard" style="display:none!important">
+  <div class="card-glass-header">
+    <h6 class="mb-0"><i class="bi bi-activity me-2 text-success"></i>Session Activity Timeline</h6>
+  </div>
+  <div class="card-glass-body">
+    <canvas id="timelineChart" height="80"></canvas>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/engagement.js') }}"></script>
+{% endblock %}

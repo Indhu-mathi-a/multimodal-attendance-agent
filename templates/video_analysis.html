@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Video Analysis{% endblock %}
+{% block page_title %}Video Activity Analysis{% endblock %}
+
+{% block content %}
+<div class="alert alert-info d-flex gap-2 mb-4">
+  <i class="bi bi-shield-lock-fill fs-5 flex-shrink-0"></i>
+  <div>
+    <strong>Privacy Notice:</strong> Video is processed <strong>locally on your device</strong>.
+    No footage is uploaded to external servers. Raw video is not stored permanently after processing
+    unless you explicitly choose to keep it. Analysis results are <strong>aggregate only</strong> –
+    no individual identification is performed.
+  </div>
+</div>
+
+<!-- Session + Upload -->
+<div class="row g-4 mb-4">
+  <div class="col-md-5">
+    <div class="card-glass h-100">
+      <div class="card-glass-header">
+        <h6 class="mb-0"><i class="bi bi-calendar2-week-fill me-2 text-primary"></i>Select Session</h6>
+      </div>
+      <div class="card-glass-body">
+        <label class="form-label">Session</label>
+        <select id="videoSessionSelect" class="form-select mb-3">
+          <option value="">Choose a session…</option>
+        </select>
+        <label class="form-label">Upload Classroom Video</label>
+        <div class="upload-zone" id="videoDropzone">
+          <i class="bi bi-camera-video fs-1 text-primary opacity-50 mb-3"></i>
+          <p class="mb-1">Drag & drop video file here</p>
+          <p class="text-muted small">or</p>
+          <label class="btn btn-outline-primary btn-sm" for="videoFile">Browse File</label>
+          <input type="file" id="videoFile" accept=".mp4,.avi,.mov,.mkv,.webm" class="d-none" />
+          <p class="text-muted small mt-2">Supported: MP4, AVI, MOV, MKV, WebM — Max 500 MB</p>
+        </div>
+        <button class="btn btn-primary w-100 mt-3" id="uploadVideoBtn" disabled>
+          <i class="bi bi-play-circle me-1"></i>Upload & Analyse
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-7">
+    <!-- Progress -->
+    <div class="card-glass mb-4" id="progressCard" style="display:none!important">
+      <div class="card-glass-header">
+        <h6 class="mb-0"><i class="bi bi-gear-fill me-2 text-warning spin-anim"></i>Processing Video…</h6>
+      </div>
+      <div class="card-glass-body">
+        <div class="progress mb-2" style="height:10px">
+          <div class="progress-bar progress-bar-striped progress-bar-animated" id="videoProgress" style="width:0%"></div>
+        </div>
+        <p class="text-muted small mb-0" id="progressText">Starting analysis…</p>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="card-glass" id="resultsCard" style="display:none!important">
+      <div class="card-glass-header">
+        <h6 class="mb-0"><i class="bi bi-graph-up me-2 text-success"></i>Analysis Results</h6>
+      </div>
+      <div class="card-glass-body">
+        <div class="row g-3 mb-3">
+          <div class="col-4 text-center">
+            <div class="fs-2 fw-bold text-primary" id="resMovement">–</div>
+            <div class="small text-muted">Movement Score</div>
+          </div>
+          <div class="col-4 text-center">
+            <div class="fs-2 fw-bold text-purple" id="resPersons">–</div>
+            <div class="small text-muted">Avg Person Count</div>
+          </div>
+          <div class="col-4 text-center">
+            <div class="fs-2 fw-bold text-success" id="resDuration">–</div>
+            <div class="small text-muted">Duration (s)</div>
+          </div>
+        </div>
+        <canvas id="videoTimeline" height="80"></canvas>
+        <p class="text-muted small mt-2 mb-0">
+          <i class="bi bi-info-circle me-1"></i>
+          This timeline shows aggregate classroom activity levels. It does not identify individuals.
+        </p>
+      </div>
+    </div>
+
+    <!-- Past results -->
+    <div class="card-glass mt-4" id="pastResultsCard">
+      <div class="card-glass-header d-flex justify-content-between align-items-center">
+        <h6 class="mb-0"><i class="bi bi-clock-history me-2"></i>Previous Analysis</h6>
+        <button class="btn btn-sm btn-outline-primary" id="loadPastBtn">Load</button>
+      </div>
+      <div class="card-glass-body">
+        <p class="text-muted small">Select a session and click Load to view previous results.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/video_analysis.js') }}"></script>
+{% endblock %}

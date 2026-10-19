@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block page_title %}Reports{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <!-- Filters -->
+  <div class="col-12">
+    <div class="card-glass">
+      <div class="card-glass-body">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label">Session (optional)</label>
+            <select id="reportSession" class="form-select">
+              <option value="">All Sessions</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Date From</label>
+            <input type="date" id="reportDateFrom" class="form-control" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Date To</label>
+            <input type="date" id="reportDateTo" class="form-control" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Cards -->
+  <div class="col-md-6 col-xl-3">
+    <div class="card-glass text-center h-100">
+      <div class="card-glass-body py-4">
+        <i class="bi bi-clipboard2-check-fill fs-1 text-primary mb-3"></i>
+        <h6>Attendance Report</h6>
+        <p class="text-muted small">Per-record attendance with check-in times and source.</p>
+        <div class="d-flex flex-column gap-2 mt-3">
+          <button class="btn btn-primary btn-sm" id="dlAttendanceCSV">
+            <i class="bi bi-download me-1"></i>Download CSV
+          </button>
+          <button class="btn btn-outline-primary btn-sm" id="printAttendance">
+            <i class="bi bi-printer me-1"></i>Print Report
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-xl-3">
+    <div class="card-glass text-center h-100">
+      <div class="card-glass-body py-4">
+        <i class="bi bi-person-lines-fill fs-1 text-purple mb-3"></i>
+        <h6>Student Summary</h6>
+        <p class="text-muted small">Per-student attendance percentage across all sessions.</p>
+        <div class="d-flex flex-column gap-2 mt-3">
+          <button class="btn btn-primary btn-sm" id="dlStudentCSV">
+            <i class="bi bi-download me-1"></i>Download CSV
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-xl-3">
+    <div class="card-glass text-center h-100">
+      <div class="card-glass-body py-4">
+        <i class="bi bi-graph-up fs-1 text-success mb-3"></i>
+        <h6>Activity Report</h6>
+        <p class="text-muted small">Session-level movement and audio activity summaries.</p>
+        <div class="d-flex flex-column gap-2 mt-3">
+          <button class="btn btn-primary btn-sm" id="dlActivityCSV">
+            <i class="bi bi-download me-1"></i>Download CSV
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-xl-3">
+    <div class="card-glass text-center h-100">
+      <div class="card-glass-body py-4">
+        <i class="bi bi-lightbulb-fill fs-1 text-warning mb-3"></i>
+        <h6>Recommendations</h6>
+        <p class="text-muted small">Generated teaching suggestions with supporting evidence.</p>
+        <div class="d-flex flex-column gap-2 mt-3">
+          <button class="btn btn-primary btn-sm" id="dlRecsCSV">
+            <i class="bi bi-download me-1"></i>Download CSV
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Preview iframe -->
+<div class="card-glass mt-4" id="previewCard" style="display:none!important">
+  <div class="card-glass-header d-flex justify-content-between align-items-center">
+    <h6 class="mb-0"><i class="bi bi-eye me-2"></i>Report Preview</h6>
+    <button class="btn btn-sm btn-outline-secondary" id="closePreviewBtn">Close</button>
+  </div>
+  <div class="card-glass-body p-0">
+    <iframe id="reportIframe" style="width:100%;height:600px;border:0"></iframe>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/reports.js') }}"></script>
+{% endblock %}

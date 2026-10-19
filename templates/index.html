@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+  <div class="col-xl-3 col-sm-6">
+    <div class="stat-card stat-card--blue">
+      <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+      <div class="stat-body">
+        <div class="stat-value" id="statStudents">–</div>
+        <div class="stat-label">Registered Students</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-sm-6">
+    <div class="stat-card stat-card--purple">
+      <div class="stat-icon"><i class="bi bi-calendar2-check-fill"></i></div>
+      <div class="stat-body">
+        <div class="stat-value" id="statSessions">–</div>
+        <div class="stat-label">Total Sessions</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-sm-6">
+    <div class="stat-card stat-card--green">
+      <div class="stat-icon"><i class="bi bi-person-check-fill"></i></div>
+      <div class="stat-body">
+        <div class="stat-value" id="statPresent">–</div>
+        <div class="stat-label">Total Present</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-sm-6">
+    <div class="stat-card stat-card--amber">
+      <div class="stat-icon"><i class="bi bi-bar-chart-fill"></i></div>
+      <div class="stat-body">
+        <div class="stat-value" id="statPct">–</div>
+        <div class="stat-label">Avg Attendance %</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+  <div class="col-xl-8">
+    <div class="card-glass">
+      <div class="card-glass-header">
+        <h6 class="mb-0"><i class="bi bi-bar-chart-line-fill me-2 text-primary"></i>Weekly Attendance</h6>
+      </div>
+      <div class="card-glass-body">
+        <canvas id="weeklyChart" height="100"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-4">
+    <div class="card-glass">
+      <div class="card-glass-header">
+        <h6 class="mb-0"><i class="bi bi-pie-chart-fill me-2 text-purple"></i>Attendance Split</h6>
+      </div>
+      <div class="card-glass-body d-flex align-items-center justify-content-center">
+        <canvas id="splitChart" height="180"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Sessions -->
+<div class="card-glass">
+  <div class="card-glass-header d-flex justify-content-between align-items-center">
+    <h6 class="mb-0"><i class="bi bi-clock-history me-2 text-primary"></i>Recent Sessions</h6>
+    <a href="/sessions" class="btn btn-sm btn-outline-primary">View All</a>
+  </div>
+  <div class="card-glass-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0" id="recentSessionsTable">
+        <thead>
+          <tr>
+            <th>Session</th><th>Subject</th><th>Date</th>
+            <th>Time</th><th>Status</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="recentSessionsBody">
+          <tr><td colspan="6" class="text-center py-4 text-muted">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(async function() {
+  const data = await apiFetch('/api/reports/dashboard/stats');
+  if (!data) return;
+
+  document.getElementById('statStudents').textContent = data.total_students;
+  document.getElementById('statSessions').textContent  = data.total_sessions;
+  document.getElementById('statPresent').textContent   = data.total_present;
+  document.getElementById('statPct').textContent       = (data.attendance_pct || 0) + '%';
+
+  // Weekly bar chart
+  const labels  = data.weekly_data.map(d => d.session_date);
+  const present = data.weekly_data.map(d => d.present);
+  const absent  = data.weekly_data.map(d => d.absent);
+
+  new Chart(document.getElementById('weeklyChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Present', data: present, backgroundColor: '#3b82f6', borderRadius: 6 },
+        { label: 'Absent',  data: absent,  backgroundColor: '#f43f5e', borderRadius: 6 },
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'top' } } }
+  });
+
+  // Donut
+  new Chart(document.getElementById('splitChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Present/Late', 'Absent'],
+      datasets: [{ data: [data.total_present, data.total_absent],
+        backgroundColor: ['#3b82f6', '#f43f5e'], borderWidth: 0 }]
+    },
+    options: { cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+  });
+
+  // Recent sessions table
+  const tbody = document.getElementById('recentSessionsBody');
+  if (!data.recent_sessions.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No sessions yet. <a href="/sessions">Create one →</a></td></tr>';
+  } else {
+    tbody.innerHTML = data.recent_sessions.map(s => `
+      <tr>
+        <td><strong>${s.session_name}</strong></td>
+        <td>${s.subject}</td>
+        <td>${s.session_date}</td>
+        <td>${s.start_time} – ${s.end_time}</td>
+        <td>${statusBadge(s.status)}</td>
+        <td>
+          <a href="/attendance?session=${s.id}" class="btn btn-sm btn-outline-primary me-1">Attendance</a>
+          <a href="/engagement?session=${s.id}" class="btn btn-sm btn-outline-purple">Analytics</a>
+        </td>
+      </tr>`).join('');
+  }
+})();
+
+function statusBadge(s) {
+  const map = { scheduled:'secondary', active:'success', completed:'primary', cancelled:'danger' };
+  return `<span class="badge bg-${map[s]||'secondary'}">${s}</span>`;
+}
+</script>
+{% endblock %}

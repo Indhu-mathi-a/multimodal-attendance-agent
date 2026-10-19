@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Teaching Recommendations{% endblock %}
+{% block page_title %}Teaching Recommendations{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+  <div class="col-md-6">
+    <div class="card-glass">
+      <div class="card-glass-body">
+        <label class="form-label">Select Session</label>
+        <div class="d-flex gap-2">
+          <select id="recSessionSelect" class="form-select">
+            <option value="">Choose session…</option>
+          </select>
+          <button class="btn btn-primary" id="genRecsBtn">
+            <i class="bi bi-arrow-repeat me-1"></i>Generate
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="alert alert-info mb-0">
+      <i class="bi bi-info-circle-fill me-2"></i>
+      Recommendations are generated from <strong>session activity data</strong>. 
+      They support educator judgment and do not automatically evaluate or penalise students.
+      Every suggestion includes the observation that triggered it.
+    </div>
+  </div>
+</div>
+
+<!-- Recommendations Grid -->
+<div id="recsContainer">
+  <div class="text-center py-5 text-muted" id="recsPlaceholder">
+    <i class="bi bi-lightbulb fs-1 opacity-25"></i>
+    <p class="mt-3">Select a session and click Generate to view recommendations.</p>
+  </div>
+  <div class="row g-4" id="recsGrid" style="display:none!important"></div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/recommendations.js') }}"></script>
+{% endblock %}
